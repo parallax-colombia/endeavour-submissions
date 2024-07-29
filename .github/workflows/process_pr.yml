@@ -1,0 +1,75 @@
+name: Process Pull Request
+
+on:
+  pull_request:
+    types: [opened, edited, reopened]
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Extract PR Information
+        id: extract_pr
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const body = pr.body;
+            const lines = body.split('\n');
+
+            function getFieldValue(field) {
+              const line = lines.find(line => line.includes(`**${field}:**`));
+              if (line) {
+                return line.split('**')[2].trim().replace(/<!--.*-->/, '').trim();
+              }
+              return '';
+            }
+
+            return {
+              token_address: getFieldValue('Token Address'),
+              user_wallet: getFieldValue('User Wallet'),
+              project_name: getFieldValue('Project Name'),
+              description: getFieldValue('Description'),
+              logo: getFieldValue('Logo'),
+              price: getFieldValue('Price (USD)'),
+              end_price: getFieldValue('End Price (nullable, USD)'),
+              start_date: getFieldValue('Start Date'),
+              end_date: getFieldValue('End Date')
+            };
+
+      - name: Send Data to API
+        uses: actions/github-script@v4
+        env:
+          API_URL: ${{ secrets.API_URL }}
+          API_TOKEN: ${{ secrets.API_TOKEN }}
+        with:
+          script: |
+            const { token_address, user_wallet, project_name, description, logo, price, end_price, start_date, end_date } = results;
+
+            const response = await fetch(process.env.API_URL, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${process.env.API_TOKEN}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                token_address,
+                user_wallet,
+                project_name,
+                description,
+                logo,
+                price,
+                end_price,
+                start_date,
+                end_date
+              })
+            });
+
+            if (!response.ok) {
+              throw new Error(`API request failed: ${response.statusText}`);
+            }
+
+            console.log('Data sent to API successfully!');
