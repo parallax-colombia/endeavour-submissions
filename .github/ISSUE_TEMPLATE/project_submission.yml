@@ -1,0 +1,79 @@
+name: "Project Submission"
+description: "Submit your project details using this template."
+title: "[Project Submission] <Project Name>"
+labels: ["project submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Project Information
+
+  - type: input
+    id: token_address
+    attributes:
+      label: "Token Address"
+      description: "Enter the token address here"
+    validations:
+      required: true
+
+  - type: input
+    id: user_wallet
+    attributes:
+      label: "User Wallet"
+      description: "Enter your wallet address here"
+    validations:
+      required: true
+
+  - type: input
+    id: project_name
+    attributes:
+      label: "Project Name"
+      description: "Enter the project name here"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Description"
+      description: "Enter the project description here"
+    validations:
+      required: true
+
+  - type: input
+    id: logo
+    attributes:
+      label: "Logo"
+      description: "Provide a link to the project logo here"
+    validations:
+      required: true
+
+  - type: input
+    id: price
+    attributes:
+      label: "Price (USD)"
+      description: "Enter the price here"
+    validations:
+      required: true
+
+  - type: input
+    id: end_price
+    attributes:
+      label: "End Price (nullable, USD)"
+      description: "Enter the end price here, if applicable"
+
+  - type: input
+    id: start_date
+    attributes:
+      label: "Start Date"
+      description: "Enter the start date here in YYYY-MM-DD format"
+    validations:
+      required: true
+
+  - type: input
+    id: end_date
+    attributes:
+      label: "End Date"
+      description: "Enter the end date here in YYYY-MM-DD format"
+    validations:
+      required: true
