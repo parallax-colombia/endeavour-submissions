@@ -1,0 +1,68 @@
+name: Process Accepted Projects
+
+on:
+  issues:
+    types: [closed]
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for 'Project Accepted' Label
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const labels = issue.labels.map(label => label.name);
+
+            if (labels.includes('Project Accepted')) {
+              console.log('Project has been accepted. Processing...');
+
+              const body = issue.body;
+
+              function getFieldValue(field) {
+                const regex = new RegExp(`^${field}:\\s*(.*?)$`, 'm');
+                const match = body.match(regex);
+                return match ? match[1].trim() : '';
+              }
+
+              const tokenAddress = getFieldValue('Token Address');
+              const userWallet = getFieldValue('User Wallet');
+              const projectName = getFieldValue('Project Name');
+              const description = getFieldValue('Description');
+              const logo = getFieldValue('Logo');
+              const price = getFieldValue('Price (USD)');
+              const endPrice = getFieldValue('End Price (nullable, USD)');
+              const startDate = getFieldValue('Start Date');
+              const endDate = getFieldValue('End Date');
+
+              const apiUrl = process.env.API_URL;
+              const apiToken = process.env.API_TOKEN;
+
+              const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${apiToken}`,
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  token_address: tokenAddress,
+                  user_wallet: userWallet,
+                  project_name: projectName,
+                  description: description,
+                  logo: logo,
+                  price: price,
+                  end_price: endPrice,
+                  start_date: startDate,
+                  end_date: endDate
+                })
+              });
+
+              if (!response.ok) {
+                throw new Error(`API request failed: ${response.statusText}`);
+              }
+
+              console.log('Data sent to API successfully!');
+            } else {
+              console.log('No action taken: Project not accepted.');
+            }
